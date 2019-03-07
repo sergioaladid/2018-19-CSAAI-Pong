@@ -8,6 +8,15 @@ function main()
 
   var ctx = canvas.getContext("2d");
 
+
+  window.onkeydown = (e) => {
+    e.preventDefault();
+    console.log (e.key);
+    if(e.key == 'a'){
+      console.log("tecla apretada")
+    }
+  }
+
   //-- Raquetas
   ctx.fillStyle = 'white';
   ctx.fillRect(50,100, 10, 40)
