@@ -10,3 +10,10 @@
 body{
   background-color: #1A994A;
 }
+p{
+  text-align: center;
+}
+#sacar{
+  margin-left: 930px;
+  margin-right: 930px;
+}

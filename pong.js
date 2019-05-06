@@ -143,30 +143,30 @@ function main()
         if (bola.x > canvas.width ||
                (bola.y > player2.y && bola.y < player2.y+player2.height && bola.x > player2.x)){
               bola.direction = "left";
-              bola.v_x = -4;
+              bola.v_x = -7;
               if(bola.x > canvas.width){
                 player1.puntos += 1;
               }
         }else if (bola.y > canvas.height){
            if(bola.direction == "right"){
-             bola.v_x = 4;
-             bola.v_y = -1;
+             bola.v_x = 7;
+             bola.v_y = -2;
            }else if(bola.direction == "left"){
-             bola.v_x = -4;
-             bola.v_y = -1;
+             bola.v_x = -7;
+             bola.v_y = -2;
            }
          }else if (bola.y < 0){
            if(bola.direction == "right"){
-             bola.v_x = 4;
-             bola.v_y = 1;
+             bola.v_x = 7;
+             bola.v_y = 2;
            }else if(bola.direction == "left"){
-             bola.v_x = -4;
-             bola.v_y = 1;
+             bola.v_x = -7;
+             bola.v_y = 2;
            }
          }else if(bola.x < 0 ||
           (bola.y > player1.y && bola.y < player1.y+player1.height && bola.x < player1.x+player1.width)){
            bola.direction = "right";
-           bola.v_x = 4;
+           bola.v_x = 7;
            if(bola.x < 0){
              player2.puntos += 1;
            }
@@ -176,34 +176,35 @@ function main()
          window.onkeydown = (e) => {
               e.preventDefault();
               if(e.key == 'w'){
-                player1.y = player1.y - 7;
+                player1.y = player1.y - 10;
               }else if(e.key == 's'){
-                player1.y = player1.y + 7;
-              }else if(e.key == 'ArrowUp'){
-                player2.y = player2.y - 7;
-              }else if(e.key == 'ArrowDown'){
-                player2.y = player2.y + 7;
+                player1.y = player1.y + 10;
               }
               if(player1.y < 0){
                 player1.y = 0;
               }else if(player1.y + player1.height > canvas.height){
                 player1.y = canvas.height - player1.height;
-              }else if(player2.y < 0){
-                player2.y = 0;
-              }else if(player2.y + player2.height > canvas.height){
-                player2.y = canvas.height - player2.height;
               }
-            }
+          }
 
-            //terminar juego y reset
-            if (player1.puntos >= puntuacion_max || player2.puntos >= puntuacion_max) {
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
-              clearInterval(timer)
-              ctx.fillText("GAME OVER", 90, 100)
-              ctx.font = "20px Impact"
-              timer = null;
-            }
-          },25);
-        }
-     }
-  }
+          //--movimiento de la cpu
+          player2.y = bola.y -+ 2;
+          if(player2.y < 0){
+            player2.y = 0;
+          }else if(player2.y + player2.height > canvas.height){
+            player2.y = canvas.height - player2.height;
+          }
+
+
+          //terminar juego y reset
+          if (player1.puntos >= puntuacion_max || player2.puntos >= puntuacion_max) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            clearInterval(timer)
+            ctx.fillText("GAME OVER", 90, 100)
+            ctx.font = "20px Impact"
+            timer = null;
+          }
+        },25);
+      }
+    }
+}
