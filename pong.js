@@ -8,54 +8,40 @@ function main()
 
   var ctx = canvas.getContext("2d");
 
-
-  window.onkeydown = (e) => {
-    e.preventDefault();
-    console.log (e.key);
-    if(e.key == 'a'){
-      console.log("tecla apretada")
-    }
-  }
-
-  //-- Raquetas
-  ctx.fillStyle = 'white';
-  ctx.fillRect(50,100, 10, 40)
-  ctx.fillRect(550,170, 10, 40)
-
   //-- Mitad de campo
-  ctx.fillRect(300,0, 3, 15)
-  ctx.fillRect(300,40, 3, 15)
-  ctx.fillRect(300,80, 3, 15)
-  ctx.fillRect(300,120, 3, 15)
-  ctx.fillRect(300,160, 3, 15)
-  ctx.fillRect(300,200, 3, 15)
-  ctx.fillRect(300,240, 3, 15)
-  ctx.fillRect(300,280, 3, 15)
-  ctx.fillRect(300,320, 3, 15)
-  ctx.fillRect(300,360, 3, 15)
-  ctx.fillRect(300,400, 3, 15)
+  ctx.setLineDash([20, 15]);
+  ctx.moveTo(300, 0);
+  ctx.lineTo(300, 400);
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth = 4;
+  ctx.stroke();
 
   //-- Marcador
-  ctx.font = "70px Arial";
-  ctx.fillStyle = 'white'
-  ctx.fillText("0", 220, 70);
+  function marcador() {
+      ctx.font = "70px Arial";
+      ctx.fillStyle = 'white'
+      ctx.fillText(player1.puntos, canvas.width/4, 60)
 
-  ctx.font = "70px Arial";
-  ctx.fillStyle = 'white'
-  ctx.fillText("0", 340, 70);
+      ctx.font = "70px Arial";
+      ctx.fillStyle = 'white'
+      ctx.fillText(player2.puntos, 3*canvas.width/4 -30, 60)
+    }
 
+  //-- Bola
   var bola = {
 
     x_ini: 50,
     y_ini: 50,
 
-    vx: 4,
-    vy: 1,
+    v_x: 4,
+    v_y: 1,
 
     x: 0,
     y: 0,
 
     ctx: null,
+
+    direction: "right",
 
     init: function(ctx) {
       this.ctx = ctx;
@@ -71,9 +57,14 @@ function main()
       ctx.fillStyle = 'white';
       ctx.fill()
     },
+
+    /*draw: function(){
+      this.ctx.fillStyle = 'white';
+      this.ctx.fillRect(this.x,this.y,this.width, this.height);
+    }, */
     update: function () {
-      this.x += this.vx;
-      this.y += this.vy;
+      this.x += this.v_x;
+      this.y += this.v_y;
     },
     reset: function() {
       this.x = this.x_ini;
@@ -81,33 +72,138 @@ function main()
     }
   }
 
+  //-- Palas
+  function pala(posicion_x, posicion_y){
+    this.x_ini = posicion_x;
+    this.y_ini = posicion_y;
+
+    this.y = 0;
+    this.x = 0;
+
+    this.width = 7;
+    this.height = 40;
+
+    this.ctx = null;
+
+    this.puntos = 0;
+
+    this.draw = function(){
+      this.ctx.fillStyle = 'white';
+      this.ctx.fillRect(this.x,this.y,this.width,this.height);
+    };
+
+    this.reset = function(){
+      this.x = this.x_ini;
+      this.y = this.y_ini;
+    };
+
+    this.init = function(ctx) {
+      this.ctx = ctx;
+      this.reset();
+
+    };
+  }
+
+  var player1 = new pala(40,30)
+  var player2 = new pala(553,340)
+  var puntuacion_max = 3
+
+
+
   bola.init(ctx)
   bola.draw()
+  player1.init(ctx)
+  player2.init(ctx)
+  player1.draw()
+  player2.draw()
+  marcador()
+
 
   var timer = null;
   var sacar = document.getElementById('sacar')
-
   sacar.onclick = () => {
-
     if (!timer) {
-
       timer = setInterval(()=>{
-
         bola.update();
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         bola.draw();
+        player1.draw();
+        player2.draw();
+        marcador();
 
-        if (bola.x > canvas.width) {
+        //--Dibujamos el campo
+        ctx.setLineDash([20, 15]);
+        ctx.moveTo(300, 0);
+        ctx.lineTo(300, 400);
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 4;
+        ctx.stroke();
 
-          clearInterval(timer)
-          timer = null;
+        //--Colisiones de la Bola
+        if (bola.x > canvas.width ||
+               (bola.y > player2.y && bola.y < player2.y+player2.height && bola.x > player2.x)){
+              bola.direction = "left";
+              bola.v_x = -4;
+              if(bola.x > canvas.width){
+                player1.puntos += 1;
+              }
+        }else if (bola.y > canvas.height){
+           if(bola.direction == "right"){
+             bola.v_x = 4;
+             bola.v_y = -1;
+           }else if(bola.direction == "left"){
+             bola.v_x = -4;
+             bola.v_y = -1;
+           }
+         }else if (bola.y < 0){
+           if(bola.direction == "right"){
+             bola.v_x = 4;
+             bola.v_y = 1;
+           }else if(bola.direction == "left"){
+             bola.v_x = -4;
+             bola.v_y = 1;
+           }
+         }else if(bola.x < 0 ||
+          (bola.y > player1.y && bola.y < player1.y+player1.height && bola.x < player1.x+player1.width)){
+           bola.direction = "right";
+           bola.v_x = 4;
+           if(bola.x < 0){
+             player2.puntos += 1;
+           }
+         }
 
-          bola.reset();
+         //--movimiento de las palas
+         window.onkeydown = (e) => {
+              e.preventDefault();
+              if(e.key == 'w'){
+                player1.y = player1.y - 7;
+              }else if(e.key == 's'){
+                player1.y = player1.y + 7;
+              }else if(e.key == 'ArrowUp'){
+                player2.y = player2.y - 7;
+              }else if(e.key == 'ArrowDown'){
+                player2.y = player2.y + 7;
+              }
+              if(player1.y < 0){
+                player1.y = 0;
+              }else if(player1.y + player1.height > canvas.height){
+                player1.y = canvas.height - player1.height;
+              }else if(player2.y < 0){
+                player2.y = 0;
+              }else if(player2.y + player2.height > canvas.height){
+                player2.y = canvas.height - player2.height;
+              }
+            }
 
-          bola.draw();
+            //terminar juego y reset
+            if (player1.puntos >= puntuacion_max || player2.puntos >= puntuacion_max) {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              clearInterval(timer)
+              ctx.fillText("GAME OVER", 90, 100)
+              ctx.font = "20px Impact"
+              timer = null;
+            }
+          },25);
         }
-      },20);
-    }
+     }
   }
-
-}
